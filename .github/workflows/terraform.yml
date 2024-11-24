@@ -7,6 +7,12 @@ on:
       - main
   pull_request:
 
+env:
+  TF_CLOUD_ORGANIZATION: "Basic_Infrastructure" 
+  TF_WORKSPACE: "AWS-Basic-Infrastructure"
+  TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
+  TF_VAR_environment: ${{ vars.ENVIRONMENT }}
+
 jobs:
   terraform:
     name: "Terraform"
@@ -22,6 +28,8 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
       - name: Terraform Init
         run: terraform init
@@ -29,6 +37,14 @@ jobs:
       - name: Terraform Format
         run: terraform fmt -check
 
+      - name: Print Configuration
+        run: |
+          echo "Creating bucket with name: $TF_VAR_bucket_name"
+          echo "Environment: $TF_VAR_environment"
+
       - name: Terraform Plan
         run: terraform plan
 
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve

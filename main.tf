@@ -1,8 +1,16 @@
 terraform {
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
       version = "5.77.0"
+    }
+  }
+
+  backend "remote" {
+    organization = "Basic_Infrastructure"
+
+    workspaces {
+      name = "AWS-Basic-Infrastructure"
     }
   }
 }
@@ -23,4 +31,15 @@ module "s3_bucket" {
   versioning = {
     enabled = true
   }
+
+  tags = {
+    Environment = var.environment
+    Managed_by  = "Terraform"
+  }
+}
+
+variable "environment" {
+  description = "Environment (dev/staging/prod)"
+  type        = string
+  default     = "dev"
 }
